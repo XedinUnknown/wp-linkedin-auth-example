@@ -37,7 +37,7 @@ class LinkedIn_Auth_Handler {
      *
      * @var string
      */
-    protected $codeOptionName;
+    protected $tokenOptionName;
 
 
 	/**
@@ -46,14 +46,14 @@ class LinkedIn_Auth_Handler {
 	 * @since 0.1.
 	 *
      * @param string|null $currentState The local state code.
-     * @param string $currentState Name of the option holding the auth code.
+     * @param string $tokenOptionName Name of the option holding the auth token.
 	 */
 	public function __construct(
         $currentState,
-        $codeOptionName
+        $tokenOptionName
     ) {
 	    $this->currentState = $currentState;
-	    $this->codeOptionName = $codeOptionName;
+	    $this->tokenOptionName = $tokenOptionName;
 	}
 
 	/**
@@ -77,7 +77,7 @@ class LinkedIn_Auth_Handler {
         $state
     ) {
 	    if (!$isLink) {
-	        $this->_saveAuthToken(null);
+	        $this->_clearAuthToken();
 
 	        return;
         }
@@ -94,7 +94,7 @@ class LinkedIn_Auth_Handler {
             throw new Exception($errorMessage);
         }
 
-        $this->_saveAuthToken($code);
+        $this->_saveAuthToken($code, MONTH_IN_SECONDS * 2);
 	}
 
     /**
@@ -103,9 +103,20 @@ class LinkedIn_Auth_Handler {
      * @since 0.1
      *
      * @param string|null $token The auth token.
+     * @param int $ttl Time to live. The amount of seconds after which the token will expire.
      */
-	protected function _saveAuthToken($token)
+    protected function _saveAuthToken($token, $ttl)
     {
-        update_option($this->codeOptionName, $code, true);
+        set_transient($this->tokenOptionName, $token, $ttl);
+    }
+
+    /**
+     * Removes the access token.
+     *
+     * @since 0.1
+     */
+    protected function _clearAuthToken()
+    {
+        delete_transient($this->tokenOptionName);
     }
 }
