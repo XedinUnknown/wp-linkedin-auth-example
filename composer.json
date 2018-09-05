@@ -1,0 +1,34 @@
+{
+    "name": "xedinunknown/wp-rest-api-import",
+    "description": "A test project for Codeable",
+    "type": "wordpress-plugin",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Anton Ukhanev",
+            "email": "xedin.unknown@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.0"
+    },
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^1.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
+        "automattic/phpcs-neutron-standard": "*"
+    },
+    "scripts": {
+        "cscheck": "phpcs -s -n",
+        "csfix": "phpcbf --standard=phpcs.xml -vvv"
+    },
+    "autoload": {
+        "classmap": ["classes/"]
+    },
+    "config": {
+        "platform": {
+            "php": "7.0.29"
+        }
+    }
+}
