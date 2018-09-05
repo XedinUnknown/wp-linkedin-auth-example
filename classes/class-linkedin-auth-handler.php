@@ -77,7 +77,7 @@ class LinkedIn_Auth_Handler {
         $state
     ) {
 	    if (!$isLink) {
-	        $this->_saveAuthCode(null);
+	        $this->_saveAuthToken(null);
 
 	        return;
         }
@@ -94,17 +94,17 @@ class LinkedIn_Auth_Handler {
             throw new Exception($errorMessage);
         }
 
-        $this->_saveAuthCode($code);
+        $this->_saveAuthToken($code);
 	}
 
     /**
-     * Saves the authorization code.
+     * Saves the authorization token.
      *
      * @since 0.1
      *
-     * @param string|null $code The auth code.
+     * @param string|null $token The auth token.
      */
-	protected function _saveAuthCode($code)
+	protected function _saveAuthToken($token)
     {
         update_option($this->codeOptionName, $code, true);
     }
