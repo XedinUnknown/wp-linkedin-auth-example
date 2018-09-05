@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 use XedinUnknown\RestApiImport\DI_Container;
 use XedinUnknown\RestApiImport\LinkedIn_Auth_Handler;
+use XedinUnknown\RestApiImport\LinkedIn_Authorizer;
 use XedinUnknown\RestApiImport\Template_Block;
 
 /**
@@ -33,10 +34,12 @@ return function ( string $base_path, string $base_url ):array {
 			'page_parent_slug'                  => 'options-general.php',
             'linkedin_auth_button_id'           => 'linkedin-authorize',
             'linkedin_api_key'                  => '77ukqcs5tjdnyv',
+            'linkedin_api_secret'               => '8JVMwvmOLuAYvmhY',
             'linkedin_sdk_is_cookie_auth'       => false,
             'auth_key_option_name'              => 'rai_auth_key',
             'linkedin_auth_key_url_param_name'  => 'linkedin_auth_key',
             'linkedin_auth_url'                 => 'https://www.linkedin.com/oauth/v2/authorization',
+            'linkedin_auth_endpoint_url'        => 'https://www.linkedin.com/oauth/v2/accessToken',
             'linkedin_authorization_nonce'      => function (): string {
 		        return wp_create_nonce();
             },
@@ -94,7 +97,20 @@ return function ( string $base_path, string $base_url ):array {
             'linked_in_auth_handler'            => function ( DI_Container $c ): callable {
                 return new LinkedIn_Auth_Handler(
                     $c->get('linkedin_authorization_nonce'),
-                    $c->get('auth_key_option_name')
+                    $c->get('auth_key_option_name'),
+                    $c->get('linkedin_authorizer')
+                );
+            },
+            'http_client'                       => function ( DI_Container $c ): WP_Http {
+		        return _wp_http_get_object();
+            },
+            'linkedin_authorizer'               => function ( DI_Container $c ): LinkedIn_Authorizer {
+                return new LinkedIn_Authorizer(
+                    $c->get('linkedin_auth_endpoint_url'),
+                    $c->get('linkedin_api_key'),
+                    $c->get('linkedin_api_secret'),
+                    $c->get('auth_key_option_name'),
+                    $c->get('http_client')
                 );
             },
 		];
