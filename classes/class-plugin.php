@@ -78,7 +78,7 @@ class Plugin {
                     $this->get_config( 'page_slug' ),
                     function () {
                         $result = $this->handle_auth();
-                        $auth_key = $this->get_linkedin_auth_key();
+                        $auth_key = $this->get_linkedin_auth_token();
                         $error_message = is_wp_error($result) ? $result->get_error_message() : null;
 
                         echo $this->get_config('block_factory')('import-settings-page.php', [ // phpcs:ignore WordPress.Security.EscapeOutput
@@ -226,9 +226,9 @@ class Plugin {
 		return $this->config->get( $key );
 	}
 
-	protected function get_linkedin_auth_key()
+	protected function get_linkedin_auth_token()
     {
-        return get_option($this->get_config('auth_key_option_name'), null);
+        return get_transient($this->get_config('auth_key_option_name'), null);
     }
 
     /**
@@ -249,7 +249,8 @@ class Plugin {
                 $this->is_linking(),
                 isset($_GET['code']) ? $_GET['code'] : null,
                 isset($_GET['error_description']) ? $_GET['error_description'] : null,
-                isset($_GET['state']) ? $_GET['state'] : null
+                isset($_GET['state']) ? $_GET['state'] : null,
+                $this->get_config('settings_page_url')
             );
         } catch (Exception $e) {
             return new WP_Error('rai_auth_error', $e->getMessage());

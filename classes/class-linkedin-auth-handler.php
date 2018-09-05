@@ -39,6 +39,15 @@ class LinkedIn_Auth_Handler {
      */
     protected $tokenOptionName;
 
+    /**
+     * The authorizer used to generate the access token.
+     *
+     * @since 0.1
+     *
+     * @var LinkedIn_Authorizer
+     */
+    protected $authorizer;
+
 
 	/**
 	 * LinkedIn_Auth_Handler constructor
@@ -47,13 +56,16 @@ class LinkedIn_Auth_Handler {
 	 *
      * @param string|null $currentState The local state code.
      * @param string $tokenOptionName Name of the option holding the auth token.
+     * @param LinkedIn_Authorizer $authorizer The authorizer used to generate the access token.
 	 */
 	public function __construct(
         $currentState,
-        $tokenOptionName
+        $tokenOptionName,
+        $authorizer
     ) {
 	    $this->currentState = $currentState;
 	    $this->tokenOptionName = $tokenOptionName;
+	    $this->authorizer = $authorizer;
 	}
 
 	/**
@@ -65,6 +77,7 @@ class LinkedIn_Auth_Handler {
      * @param string|null $inputCode The authorization code that is coming from LinkedIn.
      * @param string|null $inputErrorMessage The error message that is coming from LinkedIn.
      * @param string|null $inputState The response state code that is coming from LinkedIn.
+     * @param string $redirectUrl The redirect URL used when authenticating user with permissions.
      *
      * @throws Exception If problem handling.
      *
@@ -74,7 +87,8 @@ class LinkedIn_Auth_Handler {
 	    $isLink,
         $code,
         $errorMessage,
-        $state
+        $state,
+        $redirectUrl
     ) {
 	    if (!$isLink) {
 	        $this->_clearAuthToken();
@@ -94,7 +108,9 @@ class LinkedIn_Auth_Handler {
             throw new Exception($errorMessage);
         }
 
-        $this->_saveAuthToken($code, MONTH_IN_SECONDS * 2);
+        $result = $this->authorizer->authorize($code, $redirectUrl);
+
+        $this->_saveAuthToken($result->access_token, $result->expires_in);
 	}
 
     /**
